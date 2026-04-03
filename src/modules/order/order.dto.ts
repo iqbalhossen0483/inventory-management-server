@@ -43,7 +43,7 @@ export class CreateOrderDto {
 
   @ApiProperty({
     description: 'Customer phone number',
-    example: '1234567890',
+    example: '01853860483',
   })
   @IsNotEmpty({ message: 'Customer phone number is required' })
   @IsString({ message: 'Customer phone number must be a string' })
@@ -91,7 +91,7 @@ export class UpdateOrderDto {
 
   @ApiPropertyOptional({
     description: 'Customer phone number',
-    example: '1234567890',
+    example: '01853860483',
   })
   @IsOptional()
   @IsString({ message: 'Customer phone number must be a string' })
@@ -115,11 +115,14 @@ export class UpdateOrderDto {
 export class UpdateOrderStatusDto {
   @ApiPropertyOptional({
     description: 'Status of order',
+    enum: OrderStatus,
     example: OrderStatus.PENDING,
   })
-  @IsOptional()
-  @IsEnum(OrderStatus, { message: 'Status must be a valid enum value' })
-  status?: OrderStatus;
+  @IsNotEmpty({ message: 'Status is required' })
+  @IsEnum(OrderStatus, {
+    message: 'Status must be a valid enum value',
+  })
+  status: OrderStatus;
 }
 
 export class GetOrdersFilterDto {

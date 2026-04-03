@@ -9,6 +9,11 @@ import {
 } from 'class-validator';
 import { ProductStatus } from 'src/entites/product.entity';
 
+export enum UpdateStockType {
+  INCREASE = 'increase',
+  DECREASE = 'decrease',
+}
+
 export class CreateProductDto {
   @ApiProperty({
     description: 'Name of the product',
@@ -120,15 +125,6 @@ export class UpdateProductDto {
   purchase_price?: number;
 
   @ApiPropertyOptional({
-    description: 'Stock quantity of the product',
-    example: 100,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({}, { message: 'Stock quantity must be a number' })
-  stock_quantity?: number;
-
-  @ApiPropertyOptional({
     description: 'Minimum stock threshold of the product',
     example: 10,
   })
@@ -155,6 +151,27 @@ export class UpdateProductDto {
     message: 'Status must be either active or out_of_stock',
   })
   status?: ProductStatus;
+}
+
+export class updateStockDto {
+  @ApiProperty({
+    description: 'Stock quantity of the product',
+    example: 100,
+  })
+  @IsNotEmpty({ message: 'Stock quantity is required' })
+  @Type(() => Number)
+  @IsNumber({}, { message: 'Stock quantity must be a number' })
+  stock_quantity: number;
+
+  @ApiProperty({
+    description: 'Type of stock update',
+    example: UpdateStockType.INCREASE,
+  })
+  @IsNotEmpty({ message: 'Type is required' })
+  @IsEnum(UpdateStockType, {
+    message: 'Type must be either increase or decrease',
+  })
+  type: UpdateStockType;
 }
 
 export class GetProductsDto {

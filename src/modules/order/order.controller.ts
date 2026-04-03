@@ -11,9 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUserId } from 'src/decorators/currentUserId';
-import { OrderStatus } from 'src/entites/order.entity';
 import { AuthGaurd } from 'src/guards/AuthGaurd';
-import { CreateOrderDto, GetOrdersFilterDto } from './order.dto';
+import {
+  CreateOrderDto,
+  GetOrdersFilterDto,
+  UpdateOrderStatusDto,
+} from './order.dto';
 import { OrderService } from './order.service';
 
 @UseGuards(AuthGaurd)
@@ -42,9 +45,9 @@ export class OrderController {
   @Put('update-status/:id')
   updateOrderStatus(
     @Param('id', ParseIntPipe) id: number,
-    @Body() status: OrderStatus,
+    @Body() payload: UpdateOrderStatusDto,
   ) {
-    return this.orderService.updateOrderStatus(id, status);
+    return this.orderService.updateOrderStatus(id, payload.status);
   }
 
   @Put('update/:id')

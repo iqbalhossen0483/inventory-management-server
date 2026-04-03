@@ -2,17 +2,20 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from 'src/entites/category.entity';
 import { ProductEntity } from 'src/entites/product.entity';
-import { UserEntity } from 'src/entites/user.entity';
+import { Role, UserEntity } from 'src/entites/user.entity';
 import { API_Meta } from 'src/types/common';
 import { Repository } from 'typeorm';
 import {
   CreateProductDto,
   GetProductsDto,
   UpdateProductDto,
+  updateStockDto,
+  UpdateStockType,
 } from './product.dto';
 
 @Injectable()
@@ -20,6 +23,8 @@ export class ProductService {
   constructor(
     @InjectRepository(ProductEntity)
     private productRepository: Repository<ProductEntity>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
   async createProduct(payload: CreateProductDto, currentUserId: number) {
@@ -118,6 +123,43 @@ export class ProductService {
     return {
       success: true,
       message: 'Product updated successfully',
+      data: product,
+    };
+  }
+
+  async updateProductStock(
+    id: number,
+    payload: updateStockDto,
+    currentUserId: number,
+  ) {
+    const user = await this.userRepository.findOne({
+      where: { id: currentUserId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Unauthorized user');
+    }
+
+    if (payload.type === UpdateStockType.DECREASE && user.role !== Role.ADMIN) {
+      throw new UnauthorizedException('Unauthorized user access');
+    }
+    const product = await this.productRepository.findOne({ where: { id } });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (payload.type === UpdateStockType.INCREASE) {
+      product.stock_quantity += payload.stock_quantity;
+    } else if (payload.type === UpdateStockType.DECREASE) {
+      product.stock_quantity -= payload.stock_quantity;
+    }
+
+    await this.productRepository.save(product);
+
+    return {
+      success: true,
+      message: 'Product stock updated successfully',
       data: product,
     };
   }
