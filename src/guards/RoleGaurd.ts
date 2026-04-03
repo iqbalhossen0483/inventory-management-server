@@ -7,14 +7,14 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { Role_Key } from 'src/decorators/Role.decorators';
-import { Role } from 'src/entites/user.entity';
+import { UserRole } from 'src/entites/user.entity';
 
 @Injectable()
 export class RoleGaurd implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const roles = this.reflector.getAllAndOverride<Role[]>(Role_Key, [
+    const roles = this.reflector.getAllAndOverride<UserRole[]>(Role_Key, [
       context.getHandler(),
       context.getClass(),
     ]);

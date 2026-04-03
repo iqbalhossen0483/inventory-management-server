@@ -1,10 +1,10 @@
 import 'express-serve-static-core';
-import { Role } from 'src/entites/user.entity';
+import { UserRole } from 'src/entites/user.entity';
 
 type JWT_Payload = {
   sub: number;
   email: string;
-  role: Role;
+  role: UserRole;
 };
 
 declare module 'express-serve-static-core' {

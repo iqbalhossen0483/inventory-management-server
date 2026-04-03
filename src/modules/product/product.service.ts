@@ -10,7 +10,7 @@ import { ActivityEntity } from 'src/entites/activity.entity';
 import { CategoryEntity } from 'src/entites/category.entity';
 import { LowStockEntity } from 'src/entites/low_stock.entity';
 import { ProductEntity } from 'src/entites/product.entity';
-import { Role, UserEntity } from 'src/entites/user.entity';
+import { UserEntity, UserRole } from 'src/entites/user.entity';
 import { API_Meta } from 'src/types/common';
 import { Repository } from 'typeorm';
 import {
@@ -148,7 +148,10 @@ export class ProductService {
       throw new UnauthorizedException('Unauthorized user');
     }
 
-    if (payload.type === UpdateStockType.DECREASE && user.role !== Role.ADMIN) {
+    if (
+      payload.type === UpdateStockType.DECREASE &&
+      user.role !== UserRole.ADMIN
+    ) {
       throw new UnauthorizedException('Unauthorized user access');
     }
     const product = await this.productRepository.findOne({ where: { id } });

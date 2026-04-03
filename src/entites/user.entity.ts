@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { OrderEntity } from './order.entity';
 
-export enum Role {
+export enum UserRole {
   ADMIN = 'admin',
   MANAGER = 'manager',
 }
@@ -29,8 +29,8 @@ export class UserEntity {
   @Column({ type: 'text' })
   password: string;
 
-  @Column({ type: 'enum', enum: Role, default: Role.MANAGER })
-  role: Role;
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.MANAGER })
+  role: UserRole;
 
   @OneToMany(() => OrderEntity, (order) => order.created_by)
   orders: OrderEntity[];
