@@ -8,10 +8,8 @@ import {
 } from 'typeorm';
 
 export enum Role {
-  SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
-  STORE_MANAGER = 'store_manager',
-  SALES_MAN = 'sales_man',
+  MANAGER = 'manager',
 }
 
 @Entity('users')
@@ -29,7 +27,7 @@ export class UserEntity {
   @Column({ type: 'text' })
   password: string;
 
-  @Column({ type: 'enum', enum: Role })
+  @Column({ type: 'enum', enum: Role, default: Role.MANAGER })
   role: Role;
 
   @CreateDateColumn({ name: 'created_at' })
