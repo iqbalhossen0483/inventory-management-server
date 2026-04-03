@@ -24,11 +24,6 @@ export class RoleGaurd implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const user = request.user;
 
-    // SUPER_ADMIN bypasses all role checks
-    if (user?.role === Role.SUPER_ADMIN) {
-      return true;
-    }
-
     const hasRole = () => roles.includes(user.role);
     const isAuthorized = user && !!user.role && hasRole();
     if (!isAuthorized) {

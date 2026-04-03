@@ -3,14 +3,11 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ProductEntity } from './product.entity';
-import { UserEntity } from './user.entity';
 
 @Entity('categories')
 export class CategoryEntity {
@@ -22,13 +19,6 @@ export class CategoryEntity {
 
   @Column({ type: 'text', nullable: true })
   description: string;
-
-  @ManyToOne(() => UserEntity, (user) => user.categories, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'created_by' })
-  created_by: UserEntity;
 
   @OneToMany(() => ProductEntity, (product) => product.category)
   products: ProductEntity[];

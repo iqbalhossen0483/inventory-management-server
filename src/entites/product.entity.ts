@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CategoryEntity } from './category.entity';
+import { UserEntity } from './user.entity';
 
 export enum ProductStatus {
   ACTIVE = 'active',
@@ -51,6 +52,13 @@ export class ProductEntity {
   })
   @JoinColumn({ name: 'category_id' })
   category: CategoryEntity;
+
+  @ManyToOne(() => UserEntity, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'created_by' })
+  created_by: UserEntity;
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
