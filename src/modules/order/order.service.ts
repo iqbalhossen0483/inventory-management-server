@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -9,7 +10,7 @@ import {
   OrderEntity,
   OrderStatus,
 } from 'src/entites/order.entity';
-import { ProductEntity } from 'src/entites/product.entity';
+import { ProductEntity, ProductStatus } from 'src/entites/product.entity';
 import { API_Meta } from 'src/types/common';
 import { DataSource, Repository } from 'typeorm';
 import {
@@ -37,8 +38,19 @@ export class OrderService {
   ) {}
 
   async validateOrderedProducts(orderedProducts: OrderedProductDto[]) {
+    // validate duplication
+    const uniqueIds = new Set();
+    for (const item of orderedProducts) {
+      if (uniqueIds.has(item.product_id)) {
+        throw new ConflictException(
+          `Product ID ${item.product_id} is duplicated`,
+        );
+      }
+      uniqueIds.add(item.product_id);
+    }
+
     let totalAmount = 0;
-    const insufficientStockProducts: OrderedProductDto[] = [];
+    const insufficientStockProducts: number[] = [];
     const nonExistentProducts: number[] = [];
     const validProducts: ProductValidList[] = [];
     for (const item of orderedProducts) {
@@ -49,8 +61,15 @@ export class OrderService {
         nonExistentProducts.push(item.product_id);
         continue;
       }
+
+      if (product.status === ProductStatus.INACTIVE) {
+        throw new BadRequestException(
+          `Product ID ${item.product_id} currently unavailable`,
+        );
+      }
+
       if (product.stock_quantity < item.quantity) {
-        insufficientStockProducts.push(item);
+        insufficientStockProducts.push(item.product_id);
         continue;
       }
       const total = product.sale_price * item.quantity;
@@ -70,14 +89,12 @@ export class OrderService {
     }
 
     if (insufficientStockProducts.length > 0) {
-      const messages = insufficientStockProducts.map(
-        (item) => `Product ID ${item.product_id} has insufficient stock`,
-      );
+      let messages = `Product ID ${insufficientStockProducts.join(', ')} has insufficient stock.`;
       const validProductIds = validProducts.map((item) => item.id);
-      throw new ConflictException(
-        messages.join('; ') +
-          `. Valid product IDs: ${validProductIds.join(', ')}`,
-      );
+      if (validProductIds.length === 0) {
+        messages += `. Only product ID: ${validProductIds.join(', ')}`;
+      }
+      throw new ConflictException(messages);
     }
 
     return { totalAmount, validProducts };
