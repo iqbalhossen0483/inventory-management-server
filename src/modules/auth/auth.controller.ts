@@ -2,12 +2,20 @@ import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { CurrentUser } from 'src/decorators/currentUser';
 import { AuthGaurd } from 'src/guards/AuthGaurd';
-import { LoginDto } from './auth.dto';
+import { LoginDto, RegisterDto } from './auth.dto';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Post('register')
+  register(
+    @Body() payload: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.register(payload, res);
+  }
 
   @Post('login')
   login(@Body() payload: LoginDto, @Res({ passthrough: true }) res: Response) {

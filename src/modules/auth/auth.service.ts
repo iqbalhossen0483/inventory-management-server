@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,7 +11,7 @@ import type { Response } from 'express';
 import { UserEntity } from 'src/entites/user.entity';
 import { JWT_Payload } from 'src/types/common';
 import { FindOptionsWhere, Repository } from 'typeorm';
-import { LoginDto } from './auth.dto';
+import { LoginDto, RegisterDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +29,37 @@ export class AuthService {
       role: user.role,
     });
     return token;
+  }
+
+  async register(payload: RegisterDto, res: Response) {
+    const { email, password } = payload;
+
+    const existingUser = await this.userRepo.findOne({ where: { email } });
+    if (existingUser) {
+      throw new ConflictException('Email already in use');
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = this.userRepo.create({
+      email,
+      password: hashedPassword,
+    });
+
+    await this.userRepo.save(newUser);
+
+    const token = this.generateToken(newUser);
+    this.setCookies(res, token);
+
+    const { password: _, ...rest } = newUser;
+
+    return {
+      success: true,
+      message: 'Registration successful',
+      data: {
+        token,
+        user: rest,
+      },
+    };
   }
 
   setCookies(res: Response, token: string) {
