@@ -46,8 +46,13 @@ export class OrderController {
   updateOrderStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateOrderStatusDto,
+    @CurrentUserId() currentUserId: number,
   ) {
-    return this.orderService.updateOrderStatus(id, payload.status);
+    return this.orderService.updateOrderStatus(
+      id,
+      payload.status,
+      currentUserId,
+    );
   }
 
   @Put('update/:id')

@@ -5,14 +5,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import moment from 'moment';
+import { ActivityEntity } from 'src/entites/activity.entity';
+import { LowStockEntity, StockLevel } from 'src/entites/low_stock.entity';
 import {
   OrderedProductEntity,
   OrderEntity,
   OrderStatus,
 } from 'src/entites/order.entity';
 import { ProductEntity, ProductStatus } from 'src/entites/product.entity';
+import { UserEntity } from 'src/entites/user.entity';
 import { API_Meta } from 'src/types/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
 import {
   CreateOrderDto,
   GetOrdersFilterDto,
@@ -100,6 +104,65 @@ export class OrderService {
     return { totalAmount, validProducts };
   }
 
+  private getStockLevel(
+    currentStock: number,
+    minimumThreshold: number,
+  ): StockLevel {
+    const percentage = (currentStock / minimumThreshold) * 100;
+
+    if (percentage > 50) return StockLevel.LOW;
+    if (percentage > 20) return StockLevel.MEDIUM;
+    return StockLevel.HIGH;
+  }
+
+  async queueProductForLowStock(
+    queryRunner: QueryRunner,
+    item: ProductValidList,
+  ) {
+    const product = await queryRunner.manager.findOne(ProductEntity, {
+      where: { id: item.id },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    // Mark Out of Stock if quantity is 0
+    if (product.stock_quantity <= 0) {
+      product.status = ProductStatus.OUT_OF_STOCK;
+      await queryRunner.manager.save(product);
+    }
+
+    // Add to Low Stock / Restock Queue if below threshold
+    else if (product.stock_quantity < product.minimum_stock_threshold) {
+      // check if already in queue to avoid duplicates
+      const existingLowStock = await queryRunner.manager.findOne(
+        LowStockEntity,
+        {
+          where: { product: { id: product.id } },
+        },
+      );
+
+      if (!existingLowStock) {
+        const lowStock = queryRunner.manager.create(LowStockEntity, {
+          product: product,
+          stock_level: this.getStockLevel(
+            product.stock_quantity,
+            product.minimum_stock_threshold,
+          ),
+        });
+        await queryRunner.manager.save(lowStock);
+
+        // Create activity
+        const time = moment().utc().format('YYYY-MM-DD HH:mm:ss');
+        const activity = queryRunner.manager.create(ActivityEntity, {
+          description: `${time} - Product "${product.name}" added to Restock Queue`,
+        });
+        await queryRunner.manager.save(activity);
+      }
+    }
+  }
+
   async createOrder(payload: CreateOrderDto, currentUserId: number) {
     const orderedProducts = payload.ordered_products;
 
@@ -113,11 +176,19 @@ export class OrderService {
     await queryRunner.startTransaction();
 
     try {
+      const user = await queryRunner.manager.findOne(UserEntity, {
+        where: { id: currentUserId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
       const order = queryRunner.manager.create(OrderEntity, {
         customer_name: payload.customer_name,
         customer_address: payload.customer_address,
         customer_phone: payload.customer_phone,
-        created_by: { id: currentUserId },
+        created_by: user,
         total_amount: totalAmount,
         status: payload.status,
         ordered_products: validProducts.map((item) => ({
@@ -138,7 +209,17 @@ export class OrderService {
           'stock_quantity',
           item.quantity,
         );
+
+        // check stock and queue low stock items
+        await this.queueProductForLowStock(queryRunner, item);
       }
+
+      // Create activity
+      const time = moment().utc().format('YYYY-MM-DD HH:mm:ss');
+      const activity = queryRunner.manager.create(ActivityEntity, {
+        description: `${time} - Order #${order.id} created by ${user.name}`,
+      });
+      await queryRunner.manager.save(activity);
 
       await queryRunner.commitTransaction();
 
@@ -239,13 +320,25 @@ export class OrderService {
     };
   }
 
-  async updateOrderStatus(id: number, status: OrderStatus) {
+  async updateOrderStatus(
+    id: number,
+    status: OrderStatus,
+    currentUserId: number,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      const user = await queryRunner.manager.findOne(UserEntity, {
+        where: { id: currentUserId },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
       const order = await queryRunner.manager.findOne(OrderEntity, {
         where: { id },
         relations: ['ordered_products', 'ordered_products.product'],
@@ -276,8 +369,14 @@ export class OrderService {
 
       await queryRunner.manager.save(order);
 
-      await queryRunner.commitTransaction();
+      // Create activity
+      const time = moment().utc().format('YYYY-MM-DD HH:mm:ss');
+      const activity = queryRunner.manager.create(ActivityEntity, {
+        description: `${time} - Order #${order.id} mark as ${status} by ${user.name}`,
+      });
+      await queryRunner.manager.save(activity);
 
+      await queryRunner.commitTransaction();
       return {
         success: true,
         message: 'Order status updated successfully',

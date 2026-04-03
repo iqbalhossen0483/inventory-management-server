@@ -5,7 +5,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import moment from 'moment';
+import { ActivityEntity } from 'src/entites/activity.entity';
 import { CategoryEntity } from 'src/entites/category.entity';
+import { LowStockEntity } from 'src/entites/low_stock.entity';
 import { ProductEntity } from 'src/entites/product.entity';
 import { Role, UserEntity } from 'src/entites/user.entity';
 import { API_Meta } from 'src/types/common';
@@ -25,6 +28,10 @@ export class ProductService {
     private productRepository: Repository<ProductEntity>,
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    @InjectRepository(ActivityEntity)
+    private activityRepository: Repository<ActivityEntity>,
+    @InjectRepository(LowStockEntity)
+    private lowStockRepository: Repository<LowStockEntity>,
   ) {}
 
   async createProduct(payload: CreateProductDto, currentUserId: number) {
@@ -156,6 +163,23 @@ export class ProductService {
     }
 
     await this.productRepository.save(product);
+
+    // Create activity
+    const time = moment().utc().format('YYYY-MM-DD HH:mm:ss');
+    const activity = this.activityRepository.create({
+      description: `${time} - Stock updated for "${product.name}" by ${user.name}`,
+    });
+    await this.activityRepository.save(activity);
+
+    // remove from low stock queue if stock is increased
+    if (payload.type === UpdateStockType.INCREASE) {
+      const lowStock = await this.lowStockRepository.findOne({
+        where: { product: { id: product.id } },
+      });
+      if (lowStock) {
+        await this.lowStockRepository.remove(lowStock);
+      }
+    }
 
     return {
       success: true,
