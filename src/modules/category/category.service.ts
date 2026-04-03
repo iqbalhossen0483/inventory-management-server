@@ -81,6 +81,18 @@ export class CategoryService {
       throw new NotFoundException('Category not found');
     }
 
+    // Check for name uniqueness if name is being updated
+    if (payload.name && payload.name !== category.name) {
+      const existingCategory = await this.categoryRepository.findOne({
+        where: { name: payload.name },
+      });
+      if (existingCategory) {
+        throw new ConflictException(
+          'Category with the same name already exists',
+        );
+      }
+    }
+
     // merge the existing category with the new data
     const updatedCategory = this.categoryRepository.merge(category, payload);
 

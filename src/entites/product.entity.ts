@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -22,6 +23,7 @@ export class ProductEntity {
   id: number;
 
   @Column()
+  @Index({ unique: true })
   name: string;
 
   @Column({ type: 'int', default: 0 })

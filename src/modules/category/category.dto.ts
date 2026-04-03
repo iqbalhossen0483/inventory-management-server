@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
@@ -21,7 +21,7 @@ export class CreateCategoryDto {
 }
 
 export class UpdateCategoryDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Name of the category',
     example: 'Electronics',
   })
@@ -29,7 +29,7 @@ export class UpdateCategoryDto {
   @IsString({ message: 'Category name must be a string' })
   name?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Description of the category',
     example: 'Electronics category for storing electronic items',
   })
@@ -38,7 +38,7 @@ export class UpdateCategoryDto {
 }
 
 export class GetCategoriesDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Search query for filtering categories',
     example: 'Electronics',
   })
@@ -46,7 +46,7 @@ export class GetCategoriesDto {
   @IsString({ message: 'Search query must be a string' })
   search?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Page number for pagination',
     example: 1,
   })
@@ -54,7 +54,7 @@ export class GetCategoriesDto {
   @Type(() => Number)
   page?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Number of items per page for pagination',
     example: 10,
   })

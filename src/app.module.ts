@@ -9,6 +9,7 @@ import { ThrottlerConfigModule } from './configs/throttler.config.module';
 import { winstonConfig } from './configs/winston.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { CategoryModule } from './modules/category/category.module';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CategoryModule } from './modules/category/category.module';
     ThrottlerConfigModule,
     AuthModule,
     CategoryModule,
+    ProductModule,
   ],
   providers: [
     {
