@@ -10,11 +10,6 @@ export function setupSwagger(app: INestApplication): void {
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'access-token',
     )
-    .addApiKey(
-      { type: 'apiKey', name: 'x-tenant-id', in: 'header' },
-      'tenant-id',
-    )
-    .addSecurityRequirements('tenant-id')
     .addSecurityRequirements('access-token')
     .build();
 

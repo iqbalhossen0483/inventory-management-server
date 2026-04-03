@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   async register(payload: RegisterDto, res: Response) {
-    const { email, password } = payload;
+    const { email, password, name } = payload;
 
     const existingUser = await this.userRepo.findOne({ where: { email } });
     if (existingUser) {
@@ -43,6 +43,7 @@ export class AuthService {
     const newUser = this.userRepo.create({
       email,
       password: hashedPassword,
+      name,
     });
 
     await this.userRepo.save(newUser);

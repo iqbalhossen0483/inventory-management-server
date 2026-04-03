@@ -8,6 +8,7 @@ import { JWTConfigModule } from './configs/jwt.config.module';
 import { ThrottlerConfigModule } from './configs/throttler.config.module';
 import { winstonConfig } from './configs/winston.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { CategoryModule } from './modules/category/category.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from './modules/auth/auth.module';
     JWTConfigModule,
     ThrottlerConfigModule,
     AuthModule,
+    CategoryModule,
   ],
   providers: [
     {

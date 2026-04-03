@@ -1,0 +1,48 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGaurd } from 'src/guards/AuthGaurd';
+import { CreateCategoryDto, GetCategoriesDto } from './category.dto';
+import { CategoryService } from './category.service';
+
+@UseGuards(AuthGaurd)
+@Controller('category')
+export class CategoryController {
+  constructor(private readonly categoryService: CategoryService) {}
+
+  @Post('create')
+  async createCategory(@Body() payload: CreateCategoryDto) {
+    return this.categoryService.createCategory(payload);
+  }
+
+  @Get('all')
+  async getAllCategories(@Query() payload: GetCategoriesDto) {
+    return this.categoryService.getAllCategories(payload);
+  }
+
+  @Get(':id')
+  async getCategoryById(@Param('id') id: number) {
+    return this.categoryService.getCategoryById(id);
+  }
+
+  @Put(':id')
+  async updateCategory(
+    @Param('id') id: number,
+    @Body() payload: CreateCategoryDto,
+  ) {
+    return this.categoryService.updateCategory(id, payload);
+  }
+
+  @Delete(':id')
+  async softDeleteCategory(@Param('id') id: number) {
+    return this.categoryService.softDeleteCategory(id);
+  }
+}
