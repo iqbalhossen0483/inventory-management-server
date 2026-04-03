@@ -24,6 +24,15 @@ export class OrderEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  customer_name: string;
+
+  @Column()
+  customer_address: string;
+
+  @Column()
+  customer_phone: string;
+
   @ManyToOne(() => UserEntity, { nullable: true, onDelete: 'SET NULL' })
   created_by: UserEntity;
 
@@ -77,7 +86,4 @@ export class OrderedProductEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
-
-  @DeleteDateColumn({ name: 'deleted_at' })
-  deleted_at: Date;
 }

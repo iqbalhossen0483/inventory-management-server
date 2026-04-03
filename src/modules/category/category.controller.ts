@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -28,21 +29,21 @@ export class CategoryController {
     return this.categoryService.getAllCategories(payload);
   }
 
-  @Get(':id')
-  async getCategoryById(@Param('id') id: number) {
+  @Get('get-single/:id')
+  async getCategoryById(@Param('id', ParseIntPipe) id: number) {
     return this.categoryService.getCategoryById(id);
   }
 
-  @Put(':id')
+  @Put('update/:id')
   async updateCategory(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() payload: CreateCategoryDto,
   ) {
     return this.categoryService.updateCategory(id, payload);
   }
 
-  @Delete(':id')
-  async softDeleteCategory(@Param('id') id: number) {
+  @Delete('delete/:id')
+  async softDeleteCategory(@Param('id', ParseIntPipe) id: number) {
     return this.categoryService.softDeleteCategory(id);
   }
 }

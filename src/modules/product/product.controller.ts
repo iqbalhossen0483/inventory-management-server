@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -31,21 +33,21 @@ export class ProductController {
     return this.productService.getAllProducts(payload);
   }
 
-  @Get(':id')
-  async getProductById(@Param('id') id: number) {
+  @Get('get-single/:id')
+  async getProductById(@Param('id', ParseIntPipe) id: number) {
     return this.productService.getProductById(id);
   }
 
   @Put('update/:id')
   async updateProduct(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() payload: CreateProductDto,
   ) {
     return this.productService.updateProduct(id, payload);
   }
 
-  @Put('soft-delete/:id')
-  async softDeleteProduct(@Param('id') id: number) {
+  @Delete('delete/:id')
+  async softDeleteProduct(@Param('id', ParseIntPipe) id: number) {
     return this.productService.softDeleteProduct(id);
   }
 }

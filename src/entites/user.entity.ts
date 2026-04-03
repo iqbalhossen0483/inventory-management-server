@@ -35,6 +35,9 @@ export class UserEntity {
   @OneToMany(() => OrderEntity, (order) => order.created_by)
   orders: OrderEntity[];
 
+  @Column({ type: 'boolean', default: true })
+  is_active: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 
