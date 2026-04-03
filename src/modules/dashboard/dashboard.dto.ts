@@ -27,3 +27,21 @@ export class GetDashboardDataDto {
   @Type(() => Date)
   date?: Date;
 }
+
+export class GetLowStockDto {
+  @ApiPropertyOptional({
+    description: 'Page number for pagination',
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  page?: number;
+
+  @ApiPropertyOptional({
+    description: 'Number of items per page for pagination',
+    example: 10,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  limit?: number;
+}

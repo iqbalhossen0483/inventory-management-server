@@ -68,6 +68,7 @@ export class ProductService {
     }
 
     const [products, total] = await query
+      .orderBy('product.created_at', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();

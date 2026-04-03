@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import moment from 'moment';
+import { LowStockEntity } from 'src/entites/low_stock.entity';
 import { OrderEntity, OrderStatus } from 'src/entites/order.entity';
 import { ProductEntity } from 'src/entites/product.entity';
 import { Between, Repository } from 'typeorm';
-import { GetDashboardDataDto } from './dashboard.dto';
+import { GetDashboardDataDto, GetLowStockDto } from './dashboard.dto';
 
 @Injectable()
 export class DashboardService {
@@ -13,6 +14,8 @@ export class DashboardService {
     private orderRepository: Repository<OrderEntity>,
     @InjectRepository(ProductEntity)
     private productRepository: Repository<ProductEntity>,
+    @InjectRepository(LowStockEntity)
+    private lowStockRepository: Repository<LowStockEntity>,
   ) {}
 
   async getDashboardReport(queries: GetDashboardDataDto) {
@@ -107,6 +110,23 @@ export class DashboardService {
       success: true,
       message: 'Dashboard data fetched successfully',
       data: result,
+    };
+  }
+
+  async getLowStockItems(queries: GetLowStockDto) {
+    const { page = 1, limit = 10 } = queries;
+    const lowStockItems = await this.lowStockRepository.find({
+      order: {
+        created_at: 'DESC',
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      success: true,
+      message: 'Low stock items fetched successfully',
+      data: lowStockItems,
     };
   }
 }

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ActivityEntity } from 'src/entites/activity.entity';
+import { LowStockEntity } from 'src/entites/low_stock.entity';
 import { OrderEntity } from 'src/entites/order.entity';
 import { ProductEntity } from 'src/entites/product.entity';
 import { ActivityService } from 'src/services/activity.service';
@@ -9,7 +10,12 @@ import { DashboardService } from './dashboard.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([OrderEntity, ProductEntity, ActivityEntity]),
+    TypeOrmModule.forFeature([
+      OrderEntity,
+      ProductEntity,
+      ActivityEntity,
+      LowStockEntity,
+    ]),
   ],
   controllers: [DashboardController],
   providers: [DashboardService, ActivityService],

@@ -286,6 +286,7 @@ export class OrderService {
     queryBuilder.leftJoinAndSelect('order.created_by', 'created_by');
 
     const [orders, total] = await queryBuilder
+      .orderBy('order.created_at', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();

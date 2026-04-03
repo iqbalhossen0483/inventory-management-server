@@ -1,7 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AuthGaurd } from 'src/guards/AuthGaurd';
 import { ActivityService } from 'src/services/activity.service';
-import { GetDashboardDataDto } from './dashboard.dto';
+import { GetDashboardDataDto, GetLowStockDto } from './dashboard.dto';
 import { DashboardService } from './dashboard.service';
 
 @UseGuards(AuthGaurd)
@@ -20,5 +20,10 @@ export class DashboardController {
   @Get('activities')
   getAllActivities() {
     return this.ActivityService.getAllActivities();
+  }
+
+  @Get('low-stock-items')
+  getLowStockItems(@Query() queries: GetLowStockDto) {
+    return this.dashboardService.getLowStockItems(queries);
   }
 }
