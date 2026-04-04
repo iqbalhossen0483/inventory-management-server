@@ -38,7 +38,7 @@ export class CategoryService {
     };
   }
 
-  async getAllCategories(payload: GetCategoriesDto) {
+  async getCategories(payload: GetCategoriesDto) {
     const { search, page = 1, limit = 10 } = payload;
     const query = this.categoryRepository.createQueryBuilder('category');
 
@@ -64,6 +64,15 @@ export class CategoryService {
       message: 'Categories fetched successfully',
       data: categories,
       meta,
+    };
+  }
+
+  async getAllCategories() {
+    const categories = await this.categoryRepository.find();
+    return {
+      success: true,
+      message: 'Categories fetched successfully',
+      data: categories,
     };
   }
 

@@ -25,8 +25,13 @@ export class CategoryController {
   }
 
   @Get('all')
-  async getAllCategories(@Query() payload: GetCategoriesDto) {
-    return this.categoryService.getAllCategories(payload);
+  async getCategories(@Query() payload: GetCategoriesDto) {
+    return this.categoryService.getCategories(payload);
+  }
+
+  @Get('get-all')
+  async getAllCategories() {
+    return this.categoryService.getAllCategories();
   }
 
   @Get('get-single/:id')
