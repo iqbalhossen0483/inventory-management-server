@@ -87,6 +87,11 @@ export class AuthService {
 
     const user = await this.getUser({ email });
 
+    // if user is not active
+    if (!user.is_active) {
+      throw new UnauthorizedException('User is not active');
+    }
+
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       throw new UnauthorizedException('Authentication failed');

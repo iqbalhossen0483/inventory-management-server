@@ -10,6 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { CurrentUserId } from 'src/decorators/currentUserId';
 import { Role } from 'src/decorators/Role.decorators';
 import { UserRole } from 'src/entites/user.entity';
 import { AuthGaurd } from 'src/guards/AuthGaurd';
@@ -29,8 +30,8 @@ export class UserController {
   }
 
   @Get('all')
-  async getAllUsers(@Query() queries: getUserDto) {
-    return this.userService.getAllUsers(queries);
+  async getAllUsers(@Query() queries: getUserDto, @CurrentUserId() id: number) {
+    return this.userService.getAllUsers(queries, id);
   }
 
   @Get('single-user/:id')

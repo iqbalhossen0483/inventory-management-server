@@ -16,10 +16,13 @@ export class UserService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async getAllUsers(queries: getUserDto) {
+  async getAllUsers(queries: getUserDto, currentUserId: number) {
     const { page = 1, limit = 10, email } = queries;
 
     const query = this.userRepository.createQueryBuilder('user');
+
+    // skip current user
+    query.where('user.id != :currentUserId', { currentUserId });
 
     if (email) {
       query.where('user.email ILIKE :email', { email: `%${email}%` });
