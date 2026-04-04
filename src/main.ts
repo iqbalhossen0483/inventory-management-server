@@ -7,7 +7,6 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { join } from 'path';
-import 'tsconfig-paths/register';
 import { AppModule } from './app.module';
 import { setupSwagger } from './configs/swagger.config';
 import { AllExceptionFilter } from './middleware/exception.filter';
