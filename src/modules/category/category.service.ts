@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from 'src/entites/category.entity';
+import { API_Meta } from 'src/types/common';
 import { Repository } from 'typeorm';
 import { CreateCategoryDto, GetCategoriesDto } from './category.dto';
 
@@ -49,11 +50,20 @@ export class CategoryService {
       const offset = (page - 1) * limit;
       query.skip(offset).take(limit);
     }
-    const categories = await query.getMany();
+    const [categories, total] = await query.getManyAndCount();
+
+    const meta: API_Meta = {
+      total,
+      limit,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    };
+
     return {
       success: true,
       message: 'Categories fetched successfully',
       data: categories,
+      meta,
     };
   }
 
