@@ -101,6 +101,14 @@ export class UpdateOrderDto {
   customer_phone?: string;
 
   @ApiPropertyOptional({
+    description: 'Customer address',
+    example: '123 Main St, Anytown, USA',
+  })
+  @IsOptional()
+  @IsString({ message: 'Customer address must be a string' })
+  customer_address?: string;
+
+  @ApiPropertyOptional({
     description: 'List of ordered products',
     type: [OrderedProductDto],
     example: [{ product_id: 1, quantity: 2 }],
