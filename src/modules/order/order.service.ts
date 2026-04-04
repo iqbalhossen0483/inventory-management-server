@@ -505,6 +505,17 @@ export class OrderService {
       throw new NotFoundException('Order not found');
     }
 
+    // Restore stock
+    if (order.status !== OrderStatus.CANCELLED) {
+      for (const item of order.ordered_products) {
+        await this.productRepository.increment(
+          { id: item.product.id },
+          'stock_quantity',
+          item.quantity,
+        );
+      }
+    }
+
     await this.orderRepository.softDelete(id);
 
     return {
