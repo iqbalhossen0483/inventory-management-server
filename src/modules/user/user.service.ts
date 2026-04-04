@@ -60,8 +60,9 @@ export class UserService {
   }
 
   async createUser(payload: createUserDto) {
-    const isExist = await this.userRepository.findOneBy({
-      email: payload.email,
+    const isExist = await this.userRepository.findOne({
+      where: { email: payload.email },
+      withDeleted: true,
     });
     if (isExist) {
       throw new ConflictException('User already exist');
