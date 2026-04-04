@@ -51,6 +51,15 @@ export class CreateProductDto {
   purchase_price: number;
 
   @ApiProperty({
+    description: 'General price of the product',
+    example: 699,
+  })
+  @IsNotEmpty({ message: 'General price is required' })
+  @Type(() => Number)
+  @IsNumber({}, { message: 'General price must be a number' })
+  general_price: number;
+
+  @ApiProperty({
     description: 'Stock quantity of the product',
     example: 100,
   })
@@ -123,6 +132,15 @@ export class UpdateProductDto {
   @Type(() => Number)
   @IsNumber({}, { message: 'Purchase price must be a number' })
   purchase_price?: number;
+
+  @ApiPropertyOptional({
+    description: 'General price of the product',
+    example: 699,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({}, { message: 'General price must be a number' })
+  general_price?: number;
 
   @ApiPropertyOptional({
     description: 'Minimum stock threshold of the product',
