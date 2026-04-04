@@ -31,9 +31,6 @@ export class ProductEntity {
   sale_price: number;
 
   @Column({ type: 'int', default: 0 })
-  general_price: number;
-
-  @Column({ type: 'int', default: 0 })
   purchase_price: number;
 
   @Column({ type: 'int', default: 0 })
