@@ -409,15 +409,13 @@ export class OrderService {
 
       const { ordered_products, ...orderData } = payload;
 
-      let updatedOrderedProducts = order.ordered_products;
       let totalAmount = order.total_amount;
 
       if (ordered_products && ordered_products.length > 0) {
         const validated = await this.validateOrderedProducts(ordered_products);
-
         totalAmount = validated.totalAmount;
 
-        // restore old stock first
+        // Restore old stock first
         for (const oldItem of order.ordered_products) {
           await queryRunner.manager.increment(
             ProductEntity,
@@ -427,7 +425,7 @@ export class OrderService {
           );
         }
 
-        // deduct new stock
+        // Deduct new stock
         for (const item of validated.validProducts) {
           await queryRunner.manager.decrement(
             ProductEntity,
@@ -437,31 +435,53 @@ export class OrderService {
           );
         }
 
-        // remove previous ordered items
+        // Remove previous ordered items directly via DB
         await queryRunner.manager.delete(OrderedProductEntity, {
           order: { id: order.id },
         });
 
-        // create new ordered items
-        updatedOrderedProducts = validated.validProducts.map((item) =>
-          queryRunner.manager.create(OrderedProductEntity, {
-            order: { id: order.id },
-            product: { id: item.id },
-            quantity: item.quantity,
-            price_at_order_time: item.price_at_order_time,
-            total_price: item.total_price,
-          }),
-        );
+        // Detach old ordered_products so cascade doesn't try to update them
+        order.ordered_products = [];
 
-        await queryRunner.manager.save(updatedOrderedProducts);
+        // Save order first (no cascade interference now)
+        const updatedOrder = queryRunner.manager.merge(OrderEntity, order, {
+          ...orderData,
+          total_amount: totalAmount,
+        });
+        await queryRunner.manager.save(OrderEntity, updatedOrder);
+
+        // Insert new ordered items using raw insert to bypass cascade entirely
+        await queryRunner.manager
+          .createQueryBuilder()
+          .insert()
+          .into(OrderedProductEntity)
+          .values(
+            validated.validProducts.map((item) => ({
+              order: { id: order.id },
+              product: { id: item.id },
+              quantity: item.quantity,
+              price_at_order_time: item.price_at_order_time,
+              total_price: item.total_price,
+            })),
+          )
+          .execute();
+
+        await queryRunner.commitTransaction();
+
+        return {
+          success: true,
+          message: 'Order updated successfully',
+          data: updatedOrder,
+        };
       }
 
+      // No ordered_products in payload — just update order fields
+      order.ordered_products = [];
       const updatedOrder = queryRunner.manager.merge(OrderEntity, order, {
         ...orderData,
         total_amount: totalAmount,
       });
-
-      await queryRunner.manager.save(updatedOrder);
+      await queryRunner.manager.save(OrderEntity, updatedOrder);
 
       await queryRunner.commitTransaction();
 
