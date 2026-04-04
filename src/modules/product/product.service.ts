@@ -55,7 +55,7 @@ export class ProductService {
     };
   }
 
-  async getAllProducts(payload: GetProductsDto) {
+  async getProducts(payload: GetProductsDto) {
     const { page = 1, limit = 10, search } = payload;
 
     const query = this.productRepository
@@ -85,6 +85,24 @@ export class ProductService {
       message: 'Products fetched successfully',
       data: products,
       meta,
+    };
+  }
+
+  async getAllProducts() {
+    const products = await this.productRepository.find({
+      select: [
+        'id',
+        'name',
+        'stock_quantity',
+        'sale_price',
+        'purchase_price',
+        'discount_price',
+      ],
+    });
+    return {
+      success: true,
+      message: 'Products fetched successfully',
+      data: products,
     };
   }
 

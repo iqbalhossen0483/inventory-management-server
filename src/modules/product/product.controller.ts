@@ -33,9 +33,14 @@ export class ProductController {
     return this.productService.createProduct(payload, currentUserId);
   }
 
+  @Get('all')
+  async getProducts(@Query() payload: GetProductsDto) {
+    return this.productService.getProducts(payload);
+  }
+
   @Get('get-all')
-  async getAllProducts(@Query() payload: GetProductsDto) {
-    return this.productService.getAllProducts(payload);
+  async getAllProducts() {
+    return this.productService.getAllProducts();
   }
 
   @Get('get-single/:id')
