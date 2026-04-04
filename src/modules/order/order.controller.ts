@@ -15,6 +15,7 @@ import { AuthGaurd } from 'src/guards/AuthGaurd';
 import {
   CreateOrderDto,
   GetOrdersFilterDto,
+  UpdateOrderDto,
   UpdateOrderStatusDto,
 } from './order.dto';
 import { OrderService } from './order.service';
@@ -58,7 +59,7 @@ export class OrderController {
   @Put('update/:id')
   updateOrder(
     @Param('id', ParseIntPipe) id: number,
-    @Body() payload: CreateOrderDto,
+    @Body() payload: UpdateOrderDto,
   ) {
     return this.orderService.updateOrder(id, payload);
   }
